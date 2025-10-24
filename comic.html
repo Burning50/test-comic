@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Komik Interaktif Barisan & Deret</title>
+<style>
+body {
+  margin: 0;
+  background: radial-gradient(circle at center, #eaf2f8, #bcd1e3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Wrapper */
+.wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.shadow {
+  position: absolute;
+  width: 4px;
+  height: 100%;
+  background: rgba(0,0,0,0.1);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+}
+
+/* Buku */
+.book {
+  width: 900px;
+  height: 600px;
+  position: relative;
+  perspective: 2000px;
+}
+
+/* Halaman */
+.page {
+  width: 50%;
+  height: 100%;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform-origin: left;
+  transform-style: preserve-3d;
+  transition: transform 1.2s cubic-bezier(.25,.85,.25,1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.page.flipped {
+  transform: rotateY(-180deg);
+  z-index: 0;
+}
+.page .front,
+.page .back {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 30px;
+}
+.page .back {
+  background: #f6f6f6;
+  transform: rotateY(180deg);
+}
+
+/* COVER */
+.cover {
+  background: linear-gradient(135deg, #0078ff, #00c8ff);
+  color: white;
+  font-weight: bold;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* TEXT & ROBOT */
+.title {
+  font-size: 20px;
+  color: #004aad;
+  text-align: center;
+  font-weight: 600;
+}
+.scene {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(180deg, #f5f9ff, #dbe9ff);
+  border-radius: 12px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+  padding: 15px;
+  margin: 8px 0;
+  flex: 1;
+}
+.text {
+  background: #f0f6ff;
+  border-radius: 10px;
+  padding: 12px;
+  color: #1a2d52;
+  text-align: center;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+  margin-top: 10px;
+}
+.robot {
+  width: 100px;
+  height: 140px;
+  background: linear-gradient(to bottom, #49a2e8, #0e5d8c);
+  border-radius: 20px;
+  position: relative;
+  animation: float 2s infinite alternate ease-in-out;
+  cursor: pointer;
+}
+.robot::before {
+  content: "";
+  position: absolute;
+  top: -25px;
+  left: 20px;
+  width: 60px;
+  height: 25px;
+  background: #0e5d8c;
+  border-radius: 12px 12px 0 0;
+}
+@keyframes float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+.speech {
+  background: #fff;
+  border: 2px solid #aad4ff;
+  padding: 10px 14px;
+  border-radius: 15px;
+  position: absolute;
+  top: -70px;
+  left: 110px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  width: 220px;
+  font-size: 14px;
+  display: none;
+}
+.speech::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  bottom: 15px;
+  border: 10px solid transparent;
+  border-right-color: #fff;
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="shadow"></div>
+  <div class="book" id="book"></div>
+</div>
+
+<script>
+const pagesData = [
+  {
+    title: "Permasalahan di Lingkungan",
+    scenes: [
+      {
+        text: "Warga desa menyusun pagar bambu dengan jarak sama. Ini mencerminkan konsep barisan aritmetika!",
+        dialogs: ["Hai! Aku Robo 🤖", "Lihat pagar itu, jaraknya sama!", "Itu barisan aritmetika!"]
+      },
+      {
+        text: "Pola seperti ini sering muncul di kehidupan sehari-hari tanpa disadari!",
+        dialogs: ["Wah, jadi matematika ada di sekitar kita!", "Betul sekali!"]
+      }
+    ],
+    backScenes: [
+      {
+        text: "Sekarang mereka menghitung jumlah bambu yang dibutuhkan.",
+        dialogs: ["Mari hitung jumlah pagar!", "Ini contoh deret aritmetika!"]
+      },
+      {
+        text: "Warga senang karena perhitungannya akurat berkat matematika!",
+        dialogs: ["Matematika itu membantu banget ya!", "Pastinya!"]
+      }
+    ]
+  },
+  {
+    title: "Barisan Aritmetika",
+    scenes: [
+      {
+        text: "Barisan aritmetika memiliki selisih tetap antar suku.",
+        dialogs: ["Contohnya 2, 4, 6, 8...", "Beda tetapnya 2!"]
+      },
+      {
+        text: "Rumus: Un = a + (n-1)d",
+        dialogs: ["Kalau a=3 dan d=5, Un ke-4 = ?", "Un = 3 + (4-1)*5 = 18!"]
+      }
+    ],
+    backScenes: [
+      {
+        text: "Nilai Un bisa menunjukkan posisi elemen terakhir dalam suatu pola.",
+        dialogs: ["Jadi kayak nomor kursi di barisan!", "Iya, tepat sekali!"]
+      },
+      {
+        text: "Coba kamu hitung Un ke-10 ya!",
+        dialogs: ["Oke, nanti aku coba!", "Semangat belajar!"]
+      }
+    ]
+  },
+  {
+    title: "Deret Aritmetika",
+    scenes: [
+      {
+        text: "Jika semua suku dijumlahkan, kita mendapat deret.",
+        dialogs: ["Sekarang kita jumlahkan semuanya!", "Hasilnya jadi deret aritmetika!"]
+      },
+      {
+        text: "Rumus: Sn = n/2 × (a + Un)",
+        dialogs: ["Misal n=5, a=3, Un=15", "Sn = 5/2 × (3+15) = 45"]
+      }
+    ],
+    backScenes: [
+      {
+        text: "Dengan deret, kita bisa menghitung total sesuatu secara efisien.",
+        dialogs: ["Misal jumlah kursi di 10 baris teater!", "Tinggal pakai rumus Sn!"]
+      },
+      {
+        text: "Robo senang melihat kamu makin paham!",
+        dialogs: ["Terima kasih Robo!", "Sama-sama!"]
+      }
+    ]
+  }
+];
+
+const book = document.getElementById("book");
+
+// Cover depan
+const cover = document.createElement("div");
+cover.className = "page cover";
+cover.innerHTML = `<div class="front cover">📘<br>Komik Interaktif<br>Barisan & Deret<br><small>Klik untuk membuka</small></div>
+                   <div class="back cover">Selamat datang!</div>`;
+book.appendChild(cover);
+
+// Buat halaman isi (depan dan belakang)
+pagesData.forEach((pageData, i) => {
+  const page = document.createElement("div");
+  page.className = "page";
+  page.innerHTML = `
+  <div class="front">
+    <div class="title">${pageData.title}</div>
+    ${pageData.scenes.map((scene, j) => `
+      <div class="scene">
+        <div class="robot" onclick="speak(${i},${j},false)"></div>
+        <div class="speech" id="speech-${i}-${j}-front"></div>
+        <div class="text">${scene.text}</div>
+      </div>
+    `).join("")}
+  </div>
+  <div class="back">
+    <div class="title">${pageData.title} (Lanjutan)</div>
+    ${pageData.backScenes.map((scene, j) => `
+      <div class="scene">
+        <div class="robot" onclick="speak(${i},${j},true)"></div>
+        <div class="speech" id="speech-${i}-${j}-back"></div>
+        <div class="text">${scene.text}</div>
+      </div>
+    `).join("")}
+  </div>`;
+  book.appendChild(page);
+});
+
+// Cover belakang
+const backCover = document.createElement("div");
+backCover.className = "page cover";
+backCover.innerHTML = `<div class="front cover">📘 TAMAT</div><div class="back cover">Sampai Jumpa!</div>`;
+book.appendChild(backCover);
+
+// Efek membalik halaman
+const pages = Array.from(document.querySelectorAll(".page"));
+pages.forEach((page, index) => {
+  page.style.zIndex = pages.length - index;
+  page.addEventListener("click", () => flipPage(page, index));
+});
+
+function flipPage(page, index) {
+  if (!page.classList.contains("flipped")) {
+    page.classList.add("flipped");
+    page.style.zIndex = index;
+  } else {
+    page.classList.remove("flipped");
+    page.style.zIndex = pages.length - index;
+  }
+}
+
+// Robot bicara
+function speak(pageIndex, sceneIndex, isBack) {
+  const side = isBack ? "back" : "front";
+  const speech = document.getElementById(`speech-${pageIndex}-${sceneIndex}-${side}`);
+  const dialogs = isBack
+    ? pagesData[pageIndex].backScenes[sceneIndex].dialogs
+    : pagesData[pageIndex].scenes[sceneIndex].dialogs;
+  if (!speech) return;
+  let i = 0;
+  speech.style.display = "block";
+  speech.textContent = dialogs[i];
+  const interval = setInterval(() => {
+    i++;
+    if (i < dialogs.length) {
+      speech.textContent = dialogs[i];
+    } else {
+      clearInterval(interval);
+      setTimeout(() => (speech.style.display = "none"), 1500);
+    }
+  }, 2000);
+}
+</script>
+</body>
+</html>
